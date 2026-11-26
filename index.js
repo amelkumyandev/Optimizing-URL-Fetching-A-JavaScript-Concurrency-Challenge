@@ -1,3 +1,7 @@
+// Set OPENWEATHER_API_KEY to include the optional weather request.
+const openWeatherApiKey = process.env.OPENWEATHER_API_KEY?.trim();
+const weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?q=London';
+
 const urls = [
     'https://jsonplaceholder.typicode.com/posts/1',
     'https://jsonplaceholder.typicode.com/posts/2',
@@ -54,7 +58,7 @@ const urls = [
     'https://rickandmortyapi.com/api/character/9',
     'https://rickandmortyapi.com/api/character/10',
     'https://api.open-notify.org/astros.json',
-    'https://api.openweathermap.org/data/2.5/weather?q=London&appid=439d4b804bc8187953eb36d2a8c26a02',
+    ...(openWeatherApiKey ? [weatherUrl] : []),
     'https://api.publicapis.org/random',
     'https://quotes.rest/qod?language=en',
     'https://api.tvmaze.com/search/shows?q=batman',
@@ -107,11 +111,14 @@ async function fetchUrlsWithLimit(urls, limit) {
     // Function to process a single URL fetch operation.
     async function fetchUrl(url) {
       try {
-        const response = await fetch(url);
+        const requestUrl = url === weatherUrl
+          ? `${url}&appid=${encodeURIComponent(openWeatherApiKey)}`
+          : url;
+        const response = await fetch(requestUrl);
         const data = await response.text();
         results.push({ url, length: data.length });
       } catch (error) {
-        results.push({ url, error: error.message });
+        results.push({ url, error: url === weatherUrl ? 'Weather request failed' : error.message });
       }
     }
   
